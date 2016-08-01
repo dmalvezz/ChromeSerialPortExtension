@@ -20,6 +20,8 @@
 		<script src='serial_port.js'></script>
 
     <script>
+      setOnDataReceivedCallback(onNewData);
+
 
       function realodDevices(){
         getDevicesList(
@@ -44,9 +46,9 @@
           {
             portName: $('#devices').val(),
             bitrate: 9600,
-        		dataBits: "eight",
-        		parityBit: "no",
-        		stopBits: "one"
+            dataBits: "eight",
+            parityBit: "no",
+            stopBits: "one"
           },
           function(response){
             console.log(response);
@@ -61,7 +63,7 @@
       }
 
       function closeCurrentPort(){
-        closePort(connectionId,
+        closePort(
           function(response){
             console.log(response);
             if(response.result === "ok"){
@@ -74,25 +76,31 @@
         );
       }
 
+      function onNewData(data){
+        var str = "";
+        var dv = new DataView(data);
+        for(var i = 0; i < dv.byteLength; i++){
+            str = str.concat(String.fromCharCode(dv.getUint8(i, true)));
+        }
+        $('#output').append(str);
+      }
+
       window.onbeforeunload = function(){
         if(isOpen()){
-          if(confirm("The serial port is still open, do you want to close?")){
-            closePort(connectionId,
-              function(response){
-                console.log(response);
-                if(response.result === "ok"){
-                  return true;
-                }
-                else{
-                  alert(response.error);
-                  return false;
-                }
+          closePort(
+            function(response){
+              console.log(response);
+              if(response.result === "ok"){
+                return null;
               }
-            );
-          }
-          return false;
+              else{
+                alert(response.error);
+                return false;
+              }
+            }
+          );
         }
-        return true;
+        return null;
       }
 
     </script>

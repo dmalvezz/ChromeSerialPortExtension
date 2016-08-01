@@ -1,23 +1,24 @@
 
 var extensionId = "fakeldaakeedmpfflakfnhfppaadaccm";
-var pageIndex;
 
 var serialConnectionId;
 var isSerialPortOpen = false;
+var onDataReceivedCallback = undefined;
 
-
-var port = chrome.runtime.connect(extensionId, {name: "knockknock"});
-console.log(port);
-port.postMessage({joke: "Knock knock"});
+var portGUID;
+var port = chrome.runtime.connect(extensionId);
 
 port.onMessage.addListener(
   function(msg) {
     console.log(msg);
-    if(msg.header === "index"){
-      pageIndex = msg.pageId;
+    if(msg.header === "guid"){
+      portGUID = msg.guid;
     }
     else if(msg.header === "serialdata"){
-      console.log(msg.data);
+      //console.log(msg.data);
+      if(onDataReceivedCallback !== undefined){
+        onDataReceivedCallback(new Uint8Array(msg.data).buffer);
+      }
     }
   }
 );
@@ -27,11 +28,11 @@ function getDevicesList(callBack){
 }
 
 function openPort(portInfo, callBack){
-  chrome.runtime.sendMessage(extensionId, {cmd: "open", pageId: pageIndex, info: portInfo},
+  chrome.runtime.sendMessage(extensionId, {cmd: "open", portGUID: portGUID, info: portInfo},
     function(response){
       if(response.result === "ok"){
-        isPortOpen = true;
-        connectionId = response.connectionInfo.connectionId;
+        isSerialPortOpen = true;
+        serialConnectionId = response.connectionInfo.connectionId;
       }
       callBack(response);
     }
@@ -42,7 +43,7 @@ function closePort(callBack){
   chrome.runtime.sendMessage(extensionId, {cmd: "close", connectionId: serialConnectionId},
     function(response){
         if(response.result === "ok"){
-          isPortOpen = false;
+          isSerialPortOpen = false;
         }
         callBack(response);
     }
@@ -50,5 +51,9 @@ function closePort(callBack){
 }
 
 function isOpen(){
-	return isPortOpen;
+	return isSerialPortOpen;
+}
+
+function setOnDataReceivedCallback(callBack){
+  onDataReceivedCallback = callBack;
 }
