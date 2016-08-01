@@ -1,19 +1,5 @@
 var connections = {};
 
-chrome.runtime.onConnect.addListener(function(port) {
-  console.assert(port.name == "knockknock");
-  port.onMessage.addListener(function(msg) {
-    if (msg.joke == "Knock knock")
-      port.postMessage({question: "Who's there?"});
-    else if (msg.answer == "Madame")
-      port.postMessage({question: "Madame who?"});
-    else if (msg.answer == "Madame... Bovary")
-      port.postMessage({question: "I don't get it."});
-  });
-});
-
-
-/*
 chrome.runtime.onMessageExternal.addListener(
 	function(request, sender, sendResponse) {
 		console.log(request);
@@ -37,25 +23,35 @@ chrome.runtime.onMessageExternal.addListener(
 
 
 function openPort(request, sender, sendResponse){
-	chrome.serial.connect(request.name,
+	chrome.serial.connect(request.info.portName,
 		{
-		bitrate: request.bitrate,
-		dataBits: request.dataBits,
-		parityBit: request.parityBit,
-		stopBits: request.stopBits
+		bitrate: request.info.bitrate,
+		dataBits: request.info.dataBits,
+		parityBit: request.info.parityBit,
+		stopBits: request.info.stopBits
 		},
 		function(connectionInfo){
-			connections[connectionInfo.connectionId] = sendResponse;
-			sendResponse(JSON.stringify(connectionInfo));
+			if (chrome.runtime.lastError) {
+				sendResponse({result: "error", error: chrome.runtime.lastError.message});
+			}
+			else{
+				connections[connectionInfo.connectionId] = sendResponse;
+				sendResponse({result:"ok", connectionInfo: connectionInfo});
+			}
 		}
 	);
 }
 
 function closePort(request, sender, sendResponse){
 	chrome.serial.disconnect(request.connectionId,
-		function(result){
-			//Remove id from connections
-			sendResponse(JSON.stringify(result));
+		function(connectionInfo){
+			if (chrome.runtime.lastError) {
+				sendResponse({result: "error", error: chrome.runtime.lastError.message});
+			}
+			else{
+				//Remove id from connections
+				sendResponse({result:"ok", connectionInfo: connectionInfo});
+			}
 		}
 	);
 }
@@ -63,8 +59,12 @@ function closePort(request, sender, sendResponse){
 function getPortList(request, sender, sendResponse){
 	chrome.serial.getDevices(
 		function(ports){
-			//console.log(JSON.stringify(ports));
-			sendResponse(JSON.stringify(ports));
+			if (chrome.runtime.lastError) {
+				sendResponse({result: "error", error: chrome.runtime.lastError.message});
+			}
+			else{
+				sendResponse({result:"ok", ports: ports});
+			}
 		}
 	);
 }
@@ -72,4 +72,3 @@ function getPortList(request, sender, sendResponse){
 function writeOnPort(request, sender, sendResponse){
 
 }
-*/

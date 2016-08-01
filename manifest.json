@@ -13,7 +13,7 @@
     "background": {
       "scripts": ["serial_interface.js"]
     }
-  }
+  },
 
   "externally_connectable": {
     "matches": ["*://*.teamzeroc.it/*"]

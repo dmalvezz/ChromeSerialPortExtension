@@ -1,31 +1,95 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang='en'>
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
     <title></title>
 
     <!-- Bootstrap -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css'>
+    <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css'>
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.2/html5shiv.js"></script>
-      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+      <script src='https://oss.maxcdn.com/libs/html5shiv/3.7.2/html5shiv.js'></script>
+      <script src='https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js'></script>
     <![endif]-->
 
-		<script src="extension_interface.js"></script>
+		<script src='serial_port.js'></script>
+
+    <script>
+      var connectionId;
+
+      function realodDevices(){
+        getDevicesList(
+          function(response){
+            console.log(response);
+            $('#devices').empty();
+
+            if(response.result === "ok"){
+              for(var i = 0; i < response.ports.length; i++){
+                $('#devices').append('<option value="' + response.ports[i].path +  '">' + response.ports[i].displayName + '(' + response.ports[i].path + ')' + '</option>');
+              }
+            }
+            else{
+              alert(response.error);
+            }
+          }
+        );
+      }
+
+      function openSelectedPort(){
+        openPort(
+          {
+            portName: $('#devices').val(),
+            bitrate: 9600,
+        		dataBits: "eight",
+        		parityBit: "no",
+        		stopBits: "one"
+          },
+          function(response){
+            console.log(response);
+            if(response.result === "ok"){
+              connectionId = response.connectionInfo.connectionId;
+            }
+            else{
+              alert(response.error);
+            }
+          }
+        );
+      }
+
+      function closeCurrentPort(){
+        closePort(connectionId,
+          function(response){
+            console.log(response);
+            if(response.result === "ok"){
+              
+            }
+            else{
+              alert(response.error);
+            }
+          }
+        );
+      }
+    </script>
 
   </head>
-  <body>
 
+  <body>
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js'></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js'></script>
+
+    <select id='devices'></select>
+    <button onclick='realodDevices()'>Reload</button>
+    <button onclick='openSelectedPort()'>Open</button>
+    <button onclick='closeCurrentPort()'>Close</button>
+
+
   </body>
+
 </html>
