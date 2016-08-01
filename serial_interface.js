@@ -1,4 +1,20 @@
-var connections = {};
+var webPages = [];
+var connections = [];
+
+chrome.runtime.onConnectExternal.addListener(
+	function(port) {
+		var portIndex = webPages.push(port) - 1;
+		port.postMessage({header: "index", pageId: portIndex});
+		port.onDisconnect.addListener(
+			function(){
+				webPages.splice(portIndex, 1);
+				console.log("Web page closed index " + portIndex);
+			}
+		);
+
+		console.log("New web page with index " + portIndex);
+	}
+);
 
 chrome.runtime.onMessageExternal.addListener(
 	function(request, sender, sendResponse) {
@@ -20,6 +36,16 @@ chrome.runtime.onMessageExternal.addListener(
 		return true;
 });
 
+chrome.serial.onReceive.addListener(
+	function(info){
+		console.log(info);
+
+		var pageId = connections[info.connectionId];
+		webPages[pageId].postMessage({header: "serialdata", data: info.data});
+
+	}
+);
+
 
 
 function openPort(request, sender, sendResponse){
@@ -35,7 +61,7 @@ function openPort(request, sender, sendResponse){
 				sendResponse({result: "error", error: chrome.runtime.lastError.message});
 			}
 			else{
-				connections[connectionInfo.connectionId] = sendResponse;
+				connections[connectionInfo.connectionId] = request.pageId;
 				sendResponse({result:"ok", connectionInfo: connectionInfo});
 			}
 		}
@@ -49,7 +75,7 @@ function closePort(request, sender, sendResponse){
 				sendResponse({result: "error", error: chrome.runtime.lastError.message});
 			}
 			else{
-				//Remove id from connections
+				connections.slice(connectionInfo.connectionId, 1);
 				sendResponse({result:"ok", connectionInfo: connectionInfo});
 			}
 		}

@@ -20,7 +20,6 @@
 		<script src='serial_port.js'></script>
 
     <script>
-      var connectionId;
 
       function realodDevices(){
         getDevicesList(
@@ -52,7 +51,7 @@
           function(response){
             console.log(response);
             if(response.result === "ok"){
-              connectionId = response.connectionInfo.connectionId;
+              //Do something
             }
             else{
               alert(response.error);
@@ -66,7 +65,7 @@
           function(response){
             console.log(response);
             if(response.result === "ok"){
-              
+              //Do something
             }
             else{
               alert(response.error);
@@ -74,6 +73,28 @@
           }
         );
       }
+
+      window.onbeforeunload = function(){
+        if(isOpen()){
+          if(confirm("The serial port is still open, do you want to close?")){
+            closePort(connectionId,
+              function(response){
+                console.log(response);
+                if(response.result === "ok"){
+                  return true;
+                }
+                else{
+                  alert(response.error);
+                  return false;
+                }
+              }
+            );
+          }
+          return false;
+        }
+        return true;
+      }
+
     </script>
 
   </head>
@@ -88,7 +109,8 @@
     <button onclick='realodDevices()'>Reload</button>
     <button onclick='openSelectedPort()'>Open</button>
     <button onclick='closeCurrentPort()'>Close</button>
-
+    <br>
+    <textarea id="output" rows="10" cols="50"></textarea>
 
   </body>
 
