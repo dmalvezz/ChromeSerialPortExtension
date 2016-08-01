@@ -28,7 +28,12 @@ function getDevicesList(callBack){
 }
 
 function openPort(portInfo, callBack){
-  chrome.runtime.sendMessage(extensionId, {cmd: "open", portGUID: portGUID, info: portInfo},
+  chrome.runtime.sendMessage(extensionId,
+    {
+      cmd: "open",
+      portGUID: portGUID,
+      info: portInfo
+    },
     function(response){
       if(response.result === "ok"){
         isSerialPortOpen = true;
@@ -40,12 +45,37 @@ function openPort(portInfo, callBack){
 }
 
 function closePort(callBack){
-  chrome.runtime.sendMessage(extensionId, {cmd: "close", connectionId: serialConnectionId},
+  chrome.runtime.sendMessage(extensionId,
+    {
+      cmd: "close",
+      connectionId: serialConnectionId
+    },
     function(response){
         if(response.result === "ok"){
           isSerialPortOpen = false;
         }
         callBack(response);
+    }
+  );
+}
+
+function write(data, callBack){
+  chrome.runtime.sendMessage(extensionId,
+    {
+      cmd: "write",
+      connectionId: serialConnectionId,
+      data: Array.prototype.slice.call(new Uint8Array(data))
+    },
+    function(response){
+      if(response.result === "ok"){
+        if(response.sendInfo.error !== undefined){
+          if(response.sendInfo.error === "disconnected" || response.sendInfo.error === "disconnected"){
+            isSerialPortOpen = false;
+            closePort(function(){});
+          }
+        }
+      }
+      callBack(response);
     }
   );
 }

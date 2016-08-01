@@ -22,7 +22,6 @@
     <script>
       setOnDataReceivedCallback(onNewData);
 
-
       function realodDevices(){
         getDevicesList(
           function(response){
@@ -85,6 +84,25 @@
         $('#output').append(str);
       }
 
+      function sendData(){
+        var input = stringToArrayBuffer($('#input').val());
+
+        write(input,
+          function(response){
+            console.log(response);
+          }
+        );
+      }
+
+      function stringToArrayBuffer(string){
+        var buffer = new ArrayBuffer(string.length);
+        var dv = new DataView(buffer);
+        for(var i = 0; i < string.length; i++){
+          dv.setUint8(i, string.charCodeAt(i));
+        }
+        return dv.buffer;
+      }
+
       window.onbeforeunload = function(){
         if(isOpen()){
           closePort(
@@ -119,6 +137,10 @@
     <button onclick='closeCurrentPort()'>Close</button>
     <br>
     <textarea id="output" rows="10" cols="50"></textarea>
+    <br>
+    <input type="text" id="input">
+    <button onclick='sendData()'>Send</button>
+
 
   </body>
 

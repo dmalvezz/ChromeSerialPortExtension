@@ -45,8 +45,6 @@ chrome.serial.onReceive.addListener(
 	}
 );
 
-
-
 function openPort(request, sender, sendResponse){
 	chrome.serial.connect(request.info.portName,
 		{
@@ -95,7 +93,16 @@ function getPortList(request, sender, sendResponse){
 }
 
 function writeOnPort(request, sender, sendResponse){
-
+	chrome.serial.send(request.connectionId, new Uint8Array(request.data).buffer,
+		function(response){
+			if (chrome.runtime.lastError) {
+				sendResponse({result: "error", error: chrome.runtime.lastError.message});
+			}
+			else{
+				sendResponse({result:"ok", sendInfo: response});
+			}
+		}
+	);
 }
 
 function getGUID() {
