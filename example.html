@@ -22,6 +22,14 @@
     <script>
       setOnDataReceivedCallback(onNewData);
 
+      isExtensionInstalled(
+        function(installed){
+          if(!installed){
+            alert("Serial Port Interface extension is missing. Please install");
+          }
+        }
+      );
+
       function realodDevices(){
         getDevicesList(
           function(response){
