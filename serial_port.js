@@ -1,5 +1,5 @@
 
-var extensionId = "fakeldaakeedmpfflakfnhfppaadaccm";
+var extensionId = "agdnkpfcfmmchhcjhnknbggldfcfmnam";
 
 function SerialPort(){
   var portGUID;

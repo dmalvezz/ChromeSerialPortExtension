@@ -1,19 +1,17 @@
 {
   "name": "Serial Port Interface",
-  "version": "1",
+  "version": "0.1.0",
   "manifest_version": 2,
   "permissions": ["serial"],
   "minimum_chrome_version": "23",
   "icons": {
     "48": "icon.png"
   },
-
   "app": {
     "background": {
       "scripts": ["serial_interface.js"]
     }
   },
-
   "externally_connectable": {
     "matches": ["*://localhost/*", "*://*.teamzeroc.it/*"]
   }

@@ -30,11 +30,11 @@
 
       var serialPort = new SerialPort;
       serialPort.setOnDataReceivedCallback(onNewData);
+      realodDevices();
 
       function realodDevices(){
         getDevicesList(
           function(response){
-            console.log(response);
             $('#devices').empty();
 
             if(response.result === "ok"){
