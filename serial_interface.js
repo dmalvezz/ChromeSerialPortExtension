@@ -33,6 +33,9 @@ chrome.runtime.onMessageExternal.addListener(
 		else if(request.cmd === "write"){
 			writeOnPort(request, sender, sendResponse);
 		}
+		else if("installed"){
+			checkInstalled(request, sender, sendResponse);
+		}
 
 		return true;
 });
@@ -104,6 +107,12 @@ function writeOnPort(request, sender, sendResponse){
 		}
 	);
 }
+
+function checkInstalled(request, sender, sendResponse){
+	var manifest = chrome.runtime.getManifest();
+	sendResponse({result: "ok", version: manifest.version});
+}
+
 
 function getGUID() {
   function s4() {

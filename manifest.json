@@ -15,6 +15,6 @@
   },
 
   "externally_connectable": {
-    "matches": ["*://*.teamzeroc.it/*"]
+    "matches": ["*://localhost/*", "*://*.teamzeroc.it/*"]
   }
 }

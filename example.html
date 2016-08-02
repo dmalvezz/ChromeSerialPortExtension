@@ -20,8 +20,6 @@
 		<script src='serial_port.js'></script>
 
     <script>
-      setOnDataReceivedCallback(onNewData);
-
       isExtensionInstalled(
         function(installed){
           if(!installed){
@@ -29,6 +27,9 @@
           }
         }
       );
+
+      var serialPort = new SerialPort;
+      serialPort.setOnDataReceivedCallback(onNewData);
 
       function realodDevices(){
         getDevicesList(
@@ -49,7 +50,7 @@
       }
 
       function openSelectedPort(){
-        openPort(
+        serialPort.openPort(
           {
             portName: $('#devices').val(),
             bitrate: 9600,
@@ -70,7 +71,7 @@
       }
 
       function closeCurrentPort(){
-        closePort(
+        serialPort.closePort(
           function(response){
             console.log(response);
             if(response.result === "ok"){
@@ -95,7 +96,7 @@
       function sendData(){
         var input = stringToArrayBuffer($('#input').val());
 
-        write(input,
+        serialPort.write(input,
           function(response){
             console.log(response);
           }
@@ -112,8 +113,8 @@
       }
 
       window.onbeforeunload = function(){
-        if(isOpen()){
-          closePort(
+        if(serialPort.isOpen()){
+          serialPort.closePort(
             function(response){
               console.log(response);
               if(response.result === "ok"){
