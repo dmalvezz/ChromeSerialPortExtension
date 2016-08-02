@@ -2,16 +2,23 @@
   "name": "Serial Port Interface",
   "version": "0.1.0",
   "manifest_version": 2,
-  "permissions": ["serial"],
-  "minimum_chrome_version": "23",
+
+  "default_locale": "en",
+  "description": "The Serial Port Interface provide a simple API interface to connect your web application to the PC serial ports.",
   "icons": {
     "48": "icon.png"
   },
+
+  "author": "Davide Malvezzi",  
+
   "app": {
     "background": {
       "scripts": ["serial_interface.js"]
     }
   },
+  "permissions": ["serial"],
+  "minimum_chrome_version": "23",
+
   "externally_connectable": {
     "matches": ["*://localhost/*", "*://*.teamzeroc.it/*"]
   }
