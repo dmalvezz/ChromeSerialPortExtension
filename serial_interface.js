@@ -1,6 +1,33 @@
+
+/**
+* @author Davide Malvezzi
+* @version 0.1.0
+* @file Google Chrome browser app to allow the use of serial ports comunication inside a web page.
+*	The app acts as an wrapper between the web pages and the serial ports.
+* The app use the chrome.serial API to interact with the serial ports and
+* the chrome.runtime messaging API to exchange information with the web page.
+* It is also provided a simple JavaScript library to use inside the web pages to access the services offered by the app.
+*/
+
+/**
+* @var webPages
+* When a ::SerialPort instance is created a chrome.runtime.Port object is created too and it tries to connect to this app.
+* If the connection is successfull the port will be saved inside the ::webPages array with a unique GUID.
+* The GUID will be used to identify which ::SerialPort is connnected to which page.
+*/
 var webPages = [];
+
+/**
+* @var connections
+* When a new serial connection is established the page GUID will be saved inside to this array.
+* Each GUID index is the unique connectionId providev by the chrome.serial API.
+*/
 var connections = [];
 
+/**
+* @brief Listener called when a new ::SerialPort instance is created.
+* A GUID is generated and sent back to the web page and the comunication port is saved inside ::webPages with the GUID as index.
+*/
 chrome.runtime.onConnectExternal.addListener(
 	function(port) {
 		var portIndex =  getGUID();
@@ -17,6 +44,15 @@ chrome.runtime.onConnectExternal.addListener(
 	}
 );
 
+/**
+* @brief Listener to handle all the web pages requests.
+* Commands:
+*	- open -> ask to try to open a port
+* - close -> ask to try to close a port
+* - list -> ask to list all the connected serial devices
+* - write -> ask to write some data on a port
+* - installed -> check if this app is installed in the browser
+*/
 chrome.runtime.onMessageExternal.addListener(
 	function(request, sender, sendResponse) {
 		console.log(request);
@@ -33,13 +69,18 @@ chrome.runtime.onMessageExternal.addListener(
 		else if(request.cmd === "write"){
 			writeOnPort(request, sender, sendResponse);
 		}
-		else if("installed"){
+		else if(request.cmd === "installed"){
 			checkInstalled(request, sender, sendResponse);
 		}
 
 		return true;
 });
 
+/**
+*	@brief Listener to handle the serial ports incoming data
+* With the connectionId it retrieves the page GUID and then the port to send the data
+* directly to the web page associated to the serial connection.
+*/
 chrome.serial.onReceive.addListener(
 	function(info){
 		console.log(info);
@@ -48,6 +89,18 @@ chrome.serial.onReceive.addListener(
 	}
 );
 
+/**
+*	@brief Try to open a serial port.
+* The request MUST contain:
+* info.portName -> path to the port to open
+* info.bitrate -> port bit rate as number
+* info.dataBits -> data bit ("eight" or "seven")
+* info.parityBit -> parity bit ("no", "odd" or "even")
+* info.stopBits -> stop bit ("one" or "two")
+*
+* If the connection is established it will send to the web page result: "ok" and the connection info, otherwise
+* it will send result: "error" and error: containing the error message.
+*/
 function openPort(request, sender, sendResponse){
 	chrome.serial.connect(request.info.portName,
 		{
@@ -113,10 +166,9 @@ function checkInstalled(request, sender, sendResponse){
 	sendResponse({result: "ok", version: manifest.version});
 }
 
-
 function getGUID() {
-  function s4() {
-    return Math.floor((1 + Math.random()) * 0x10000)
+	function s4() {
+  	return Math.floor((1 + Math.random()) * 0x10000)
       .toString(16)
       .substring(1);
   }
