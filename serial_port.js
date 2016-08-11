@@ -11,7 +11,7 @@
 /**
 * Extension unique id to start the comunication.
 */
-var extensionId = "fakeldaakeedmpfflakfnhfppaadaccm";//"agdnkpfcfmmchhcjhnknbggldfcfmnam";
+var extensionId = "agdnkpfcfmmchhcjhnknbggldfcfmnam";
 
 function SerialPort(){
   /**
@@ -79,6 +79,13 @@ function SerialPort(){
   */
   this.setOnDataReceivedCallback = function(callBack){
     onDataReceivedCallback = callBack;
+  }
+
+  /**
+  * Set the error callback.
+  */
+  this.setOnErrorReceivedCallback = function(callBack){
+    onErrorReceivedCallback = callBack;
   }
 
   /**
