@@ -143,7 +143,7 @@ function SerialPort(){
       function(response){
         if(response.result === "ok"){
           if(response.sendInfo.error !== undefined){
-            if(response.sendInfo.error === "disconnected" || response.sendInfo.error === "disconnected"){
+            if(response.sendInfo.error === "disconnected" || response.sendInfo.error === "system_error"){
               isSerialPortOpen = false;
               closePort(function(){});
             }
