@@ -94,7 +94,7 @@ chrome.serial.onReceive.addListener(
 chrome.serial.onReceiveError.addListener(
 	function(errorInfo){
 		console.error("Connection " + errorInfo.connectionId + " has error " + errorInfo.error);
-		var portGUID = serialConnections[info.connectionId];
+		var portGUID = serialConnections[errorInfo.connectionId];
 		serialPort[portGUID].postMessage({header: "serialerror", error: errorInfo.error});
 	}
 );
