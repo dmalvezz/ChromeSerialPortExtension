@@ -10,29 +10,29 @@
 
 /**
 * When a ::SerialPort instance is created a chrome.runtime.Port object is created too and it tries to connect to this app.
-* If the connection is successfull the port will be saved inside the ::webPages array with a unique GUID.
+* If the connection is successfull the port will be saved inside the ::serialPort array with a unique GUID.
 * The GUID will be used to identify which ::SerialPort is connnected to which page.
 */
-var webPages = [];
+var serialPort = [];
 
 /**
 * When a new serial connection is established the page GUID will be saved inside to this array.
 * Each GUID index is the unique connectionId providev by the chrome.serial API.
 */
-var connections = [];
+var serialConnections = [];
 
 /**
 * Listener called when a new ::SerialPort instance is created.
-* A GUID is generated and sent back to the web page and the comunication port is saved inside ::webPages with the GUID as index.
+* A GUID is generated and sent back to the web page and the comunication port is saved inside ::serialPort with the GUID as index.
 */
 chrome.runtime.onConnectExternal.addListener(
 	function(port) {
 		var portIndex =  getGUID();
-		webPages[portIndex] = port;
+		serialPort[portIndex] = port;
 		port.postMessage({header: "guid", guid: portIndex});
 		port.onDisconnect.addListener(
 			function(){
-				webPages.splice(portIndex, 1);
+				serialPort.splice(portIndex, 1);
 				console.log("Web page closed guid " + portIndex);
 			}
 		);
@@ -81,8 +81,21 @@ chrome.runtime.onMessageExternal.addListener(
 chrome.serial.onReceive.addListener(
 	function(info){
 		console.log(info);
-		var portGUID = connections[info.connectionId];
-		webPages[portGUID].postMessage({header: "serialdata", data: Array.prototype.slice.call(new Uint8Array(info.data))});
+		var portGUID = serialConnections[info.connectionId];
+		serialPort[portGUID].postMessage({header: "serialdata", data: Array.prototype.slice.call(new Uint8Array(info.data))});
+	}
+);
+
+/**
+*	Listener to handle the serial ports errors
+* With the connectionId it retrieves the page GUID and then the port to send the error
+* directly to the web page associated to the serial connection.
+*/
+chrome.serial.onReceiveError.addListener(
+	function(errorInfo){
+		console.error("Connection " + errorInfo.connectionId + " has error " + errorInfo.error);
+		var portGUID = serialConnections[info.connectionId];
+		serialPort[portGUID].postMessage({header: "serialerror", error: errorInfo.error});
 	}
 );
 
@@ -111,7 +124,7 @@ function openPort(request, sender, sendResponse){
 				sendResponse({result: "error", error: chrome.runtime.lastError.message});
 			}
 			else{
-				connections[connectionInfo.connectionId] = request.portGUID;
+				serialConnections[connectionInfo.connectionId] = request.portGUID;
 				sendResponse({result:"ok", connectionInfo: connectionInfo});
 			}
 		}
@@ -133,7 +146,7 @@ function closePort(request, sender, sendResponse){
 				sendResponse({result: "error", error: chrome.runtime.lastError.message});
 			}
 			else{
-				connections.slice(connectionInfo.connectionId, 1);
+				serialConnections.slice(connectionInfo.connectionId, 1);
 				sendResponse({result:"ok", connectionInfo: connectionInfo});
 			}
 		}

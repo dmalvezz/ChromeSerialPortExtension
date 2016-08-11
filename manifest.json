@@ -3,13 +3,12 @@
   "version": "0.1.0",
   "manifest_version": 2,
 
-  "default_locale": "en",
   "description": "The Serial Port Interface provide a simple API interface to connect your web application to the PC serial ports.",
   "icons": {
     "48": "icon.png"
   },
 
-  "author": "Davide Malvezzi",  
+  "author": "Davide Malvezzi",
 
   "app": {
     "background": {
